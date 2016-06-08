@@ -1,7 +1,5 @@
 <RCC>
     <qresource prefix="/images">
-        <file>res/llk_background_basic.jpg</file>
-        <file>res/llk_background_basicmode.jpg</file>
         <file>res/background1.jpg</file>
     </qresource>
     <qresource prefix="/icon">

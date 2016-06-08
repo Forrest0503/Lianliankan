@@ -1,4 +1,4 @@
-#include "mainwindow.h"
+#include <MainWindow/mainwindow.h>
 #include <QSpinBox>
 #include <QSlider>
 #include <QHBoxLayout>
@@ -11,10 +11,7 @@ int main(int argc, char *argv[])
 
     MainWindow w;
 
-
-
-    w.setWindowTitle("Enter your age");
-
+    w.setWindowTitle("欢乐连连看");
 
     w.show();
 

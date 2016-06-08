@@ -14,7 +14,7 @@
    <string>MainWindow</string>
   </property>
   <property name="styleSheet">
-   <string notr="true">background-image: url(:/images/res/llk_background_basic.jpg);</string>
+   <string notr="true">background-color: rgb(99, 200, 255);</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <widget class="QWidget" name="picWidget" native="true">

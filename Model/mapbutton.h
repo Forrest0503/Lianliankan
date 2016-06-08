@@ -4,6 +4,9 @@
 #include <QPushButton>
 #include <QTimer>
 
+//MapButton是自己定义的QPushButton的派生类，用来实现游戏棋盘上的图片。
+//在QPushButton的基础上，封装了带参数的clicked信号槽，参数是该button的objectName。
+//目的是当用户点击某个图片时，可以知道是哪个图片被点击了。
 class MapButton : public QPushButton
 {
     Q_OBJECT

@@ -13,18 +13,20 @@ TEMPLATE = app
 
 
 SOURCES += main.cpp\
-        mainwindow.cpp \
-    basicmodewindow.cpp \
-    relaxedmodewindow.cpp \
-    levelmodewindow.cpp \
-    game.cpp
+        MainWindow/mainwindow.cpp \
+    BasicModeWindow/basicmodewindow.cpp \
+    RelaxedModeWindow/relaxedmodewindow.cpp \
+    LevelModeWindow/levelmodewindow.cpp \
+    Model/game.cpp \
+    BasicModeWindow/DrawLineLayer.cpp
 
-HEADERS  += mainwindow.h \
-    basicmodewindow.h \
-    relaxedmodewindow.h \
-    levelmodewindow.h \
-    game.h \
-    mapbutton.h
+HEADERS  += MainWindow/mainwindow.h \
+    BasicModeWindow/basicmodewindow.h \
+    RelaxedModeWindow/relaxedmodewindow.h \
+    LevelModeWindow/levelmodewindow.h \
+    Model/mapbutton.h \
+    Model/game.h \
+    BasicModeWindow/DrawLineLayer.h
 
 FORMS    += mainwindow.ui \
     basicmodewindow.ui \

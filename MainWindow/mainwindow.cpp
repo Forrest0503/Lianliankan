@@ -1,8 +1,8 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include "basicmodewindow.h"
-#include "relaxedmodewindow.h"
-#include "levelmodewindow.h"
+#include "BasicModeWindow/basicmodewindow.h"
+#include "RelaxedModeWindow/relaxedmodewindow.h"
+#include "LevelModeWindow/levelmodewindow.h"
 #include <QDialog>
 #include <QToolBar>
 #include <QHBoxLayout>
@@ -17,6 +17,7 @@ MainWindow::MainWindow(QWidget *parent) :
     setUpWelcomeWindow();
 
     ui->setupUi(this);
+    //为不同模式的按钮添加信号槽
     connect(ui->button3, SIGNAL(clicked(bool)), this, SLOT(showBasicModeWindow()));
     connect(ui->button2, SIGNAL(clicked(bool)), this, SLOT(showRelaxedModeWindow()));
     connect(ui->button1, SIGNAL(clicked(bool)), this, SLOT(showLevelModeWindow()));
@@ -49,16 +50,18 @@ void MainWindow::showLevelModeWindow() {
     this->hide();
 }
 
-void MainWindow::setUpWelcomeWindow() {
-
+void MainWindow::setUpWelcomeWindow() { //创建欢迎界面
     QMainWindow *window = new QMainWindow();
     window->setFixedSize(800,600);
     QCoreApplication::processEvents();
 
     QWidget *cenWidget = new QWidget(window);
     window->setCentralWidget(cenWidget);
+    QLabel *emptyLabel = new QLabel(cenWidget);
     QLabel *welcomeLabel = new QLabel(cenWidget);
     welcomeLabel->setText("WELCOME TO LIANLIANKAN");
+    QLabel *nameLabel = new QLabel(cenWidget);
+    nameLabel->setText("\t\t by 程厚森");
     QGridLayout *gridLayout = new QGridLayout(cenWidget);
     QFont ft;
     ft.setPointSize(32);
@@ -67,7 +70,14 @@ void MainWindow::setUpWelcomeWindow() {
     welcomeLabel->setFont(ft);
     welcomeLabel->setPalette(pa);
     welcomeLabel->setAlignment(Qt::AlignCenter);
+    ft.setPointSize(24);
+    nameLabel->setFont(ft);
+    nameLabel->setPalette(pa);
+    nameLabel->setAlignment(Qt::AlignCenter);
+
+    gridLayout->addWidget(emptyLabel);
     gridLayout->addWidget(welcomeLabel);
+    gridLayout->addWidget(nameLabel);
 
     window->show();
     QTime t;
