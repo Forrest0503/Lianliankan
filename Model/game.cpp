@@ -30,23 +30,23 @@ bool Game::link(int x1, int y1, int x2, int y2) {
     if (map[x1][y1] != map[x2][y2]) {
         return false;
     }
-    if (map[x1][y1] == "" || map[x2][y2] == "") {
+    if (map[x1][y1] == 0 || map[x2][y2] == 0) {
         return false;
     }
     if (x1 == x2) {
         for (k = y1 + 1; k < y2; k++)
-            if (map[x1][k] != "")
+            if (map[x1][k] != 0)
                 return false;
         for (k = y2 + 1; k < y1; k++)
-            if (map[x1][k] != "")
+            if (map[x1][k] != 0)
                 return false;
     }
     if (y1 == y2) {
         for (k = x1 + 1; k < x2; k++)
-            if (map[k][y1] != "")
+            if (map[k][y1] != 0)
                 return false;
         for (k = x2 + 1; k < x1; k++)
-            if (map[k][y1] != "")
+            if (map[k][y1] != 0)
                 return false;
     }
     return true;
@@ -58,8 +58,8 @@ bool Game::linkWithNoCorner(QString pic1, QString pic2) {
 
     bool result = link(x1, y1, x2, y2);
     if (result == true) {
-        map[x1][y1] = "";
-        map[x2][y2] = "";
+        map[x1][y1] = 0;
+        map[x2][y2] = 0;
         totalPic -= 2;
     }
     flagA = true;
@@ -78,26 +78,26 @@ bool Game::linkWithOneCorner(QString pic1, QString pic2, QString& pos2) {
     }
 
     bool planA = false, planB = false;
-    if (map[x1][y2] == "") {
+    if (map[x1][y2] == 0) {
         map[x1][y2] = map[x1][y1];
         if (link(x1, y2, x1, y1) && link(x1, y2, x2, y2)) {
             planA = true;
             pos2 = QString::number(x1*18 + y2);
-            map[x1][y1] = "";
-            map[x2][y2] = "";
+            map[x1][y1] = 0;
+            map[x2][y2] = 0;
         }
-        map[x1][y2] = "";
+        map[x1][y2] = 0;
     }
 
-    if (map[x2][y1] == "") {
+    if (map[x2][y1] == 0) {
         map[x2][y1] = map[x1][y1];
         if (link(x2, y1, x1, y1) && link(x2, y1, x2, y2)) {
             planB = true;
             pos2 = QString::number(x2*18 + y1);
-            map[x1][y1] = "";
-            map[x2][y2] = "";
+            map[x1][y1] = 0;
+            map[x2][y2] = 0;
         }
-        map[x2][y1] = "";
+        map[x2][y1] = 0;
     }
 
     if (planA || planB) {
@@ -121,7 +121,7 @@ bool Game::linkWithTwoCorner(QString pic1, QString pic2, QString& pos2, QString&
     bool planA = false, planB = false, planC = false, planD = false;
     //向上
     for (int i = x1 - 1; i >= 0; i--) {
-        if (map[i][y1] != "")
+        if (map[i][y1] != 0)
             break;
         map[i][y1] = map[x1][y1];
         QString p1 = QString::number(i*18 + y1);
@@ -129,20 +129,20 @@ bool Game::linkWithTwoCorner(QString pic1, QString pic2, QString& pos2, QString&
         if (linkWithOneCorner(p1, p2, pos2)) {
             flagB = false;
             planA = true;
-            map[x1][y1] = "";
-            map[x2][y2] = "";
+            map[x1][y1] = 0;
+            map[x2][y2] = 0;
             totalPic += 2;
             QString tmp = pos2;
             pos2 = p1;
             pos3 = tmp;
             break;
         }
-        map[i][y1] = "";
+        map[i][y1] = 0;
     }
 
     //向左
     for (int i = y1 - 1; i >= 0; i--) {
-        if (map[x1][i] != "")
+        if (map[x1][i] != 0)
             break;
         map[x1][i] = map[x1][y1];
         QString p1 = QString::number(x1*18 + i);
@@ -150,8 +150,8 @@ bool Game::linkWithTwoCorner(QString pic1, QString pic2, QString& pos2, QString&
         if (linkWithOneCorner(p1, p2, pos2)) {
             flagB = false;
             planA = true;
-            map[x1][y1] = "";
-            map[x2][y2] = "";
+            map[x1][y1] = 0;
+            map[x2][y2] = 0;
             totalPic += 2;
 
             QString tmp = pos2;
@@ -159,12 +159,12 @@ bool Game::linkWithTwoCorner(QString pic1, QString pic2, QString& pos2, QString&
             pos3 = tmp;
             break;
         }
-        map[x1][i] = "";
+        map[x1][i] = 0;
     }
 
     //向右
     for (int i = y1 + 1; i < 18; i++) {
-        if (map[x1][i] != "")
+        if (map[x1][i] != 0)
             break;
         map[x1][i] = map[x1][y1];
         QString p1 = QString::number(x1*18 + i);
@@ -172,8 +172,8 @@ bool Game::linkWithTwoCorner(QString pic1, QString pic2, QString& pos2, QString&
         if (linkWithOneCorner(p1, p2, pos2)) {
             flagB = false;
             planA = true;
-            map[x1][y1] = "";
-            map[x2][y2] = "";
+            map[x1][y1] = 0;
+            map[x2][y2] = 0;
             totalPic += 2;
 
             QString tmp = pos2;
@@ -181,12 +181,12 @@ bool Game::linkWithTwoCorner(QString pic1, QString pic2, QString& pos2, QString&
             pos3 = tmp;
             break;
         }
-        map[x1][i] = "";
+        map[x1][i] = 0;
     }
 
     //向下
     for (int i = x1 + 1; i < 12; i++) {
-        if (map[i][y1] != "")
+        if (map[i][y1] != 0)
             break;
         map[i][y1] = map[x1][y1];
         QString p1 = QString::number(i*18 + y1);
@@ -194,15 +194,15 @@ bool Game::linkWithTwoCorner(QString pic1, QString pic2, QString& pos2, QString&
         if (linkWithOneCorner(p1, p2, pos2)) {
             flagB = false;
             planA = true;
-            map[x1][y1] = "";
-            map[x2][y2] = "";
+            map[x1][y1] = 0;
+            map[x2][y2] = 0;
             totalPic += 2;
             QString tmp = pos2;
             pos2 = p1;
             pos3 = tmp;
             break;
         }
-        map[i][y1] = "";
+        map[i][y1] = 0;
     }
 
     if (planA || planB || planC || planD) {
@@ -216,8 +216,22 @@ bool Game::linkWithTwoCorner(QString pic1, QString pic2, QString& pos2, QString&
 
 }
 
+void Game::useTool(QString pic1, QString pic2) {
+    int x1, x2, y1, y2;
+    getPosition(x1, y1, x2, y2, pic1, pic2);
+    map[x1][y1] = 0;
+    map[x2][y2] = 0;
+    totalPic -= 2;
+}
+
 void Game::clearRawMap() {
     for (int i = 0; i < 10; i++)
         for (int j = 0; j < 16; j++)
             rawMap[i][j] = 0;
+}
+
+void Game::init() {
+    for(int i = 0; i < 12; i++)
+        for(int j = 0; j < 18; j++)
+            map[i][j] = 0;
 }

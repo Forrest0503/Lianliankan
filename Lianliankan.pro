@@ -18,7 +18,9 @@ SOURCES += main.cpp\
     RelaxedModeWindow/relaxedmodewindow.cpp \
     LevelModeWindow/levelmodewindow.cpp \
     Model/game.cpp \
-    BasicModeWindow/DrawLineLayer.cpp
+    Dao/scoredao.cpp \
+    HelpDialog/helpdialog.cpp \
+    Model/DrawLineLayer.cpp
 
 HEADERS  += MainWindow/mainwindow.h \
     BasicModeWindow/basicmodewindow.h \
@@ -26,7 +28,9 @@ HEADERS  += MainWindow/mainwindow.h \
     LevelModeWindow/levelmodewindow.h \
     Model/mapbutton.h \
     Model/game.h \
-    BasicModeWindow/DrawLineLayer.h
+    Dao/scoredao.h \
+    HelpDialog/helpdialog.h \
+    Model/DrawLineLayer.h
 
 FORMS    += mainwindow.ui \
     basicmodewindow.ui \

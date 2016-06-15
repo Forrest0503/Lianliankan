@@ -4,6 +4,9 @@
 #include <QMainWindow>
 #include <QPushButton>
 #include <QDialog>
+#include <QTableView>
+#include "Dao/scoredao.h"
+
 namespace Ui {
 class MainWindow; //模式选择界面
 }
@@ -24,10 +27,13 @@ public slots:
     void showBasicModeWindow();
     void showRelaxedModeWindow();
     void showLevelModeWindow();
-
+    void showHelp();
+    void showRankingList();
 
 private:
     Ui::MainWindow *ui;
+    QTableView *rankTableView;
+    ScoreDao *scoreDao;
 
 };
 

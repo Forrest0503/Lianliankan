@@ -9,6 +9,10 @@
 #include <QGridLayout>
 #include <QLabel>
 #include <QDateTime>
+#include <HelpDialog/helpdialog.h>
+#include <QStandardItemModel>
+#include <vector>
+#include <fstream>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -17,11 +21,16 @@ MainWindow::MainWindow(QWidget *parent) :
     setUpWelcomeWindow();
 
     ui->setupUi(this);
+
+    scoreDao = new ScoreDao();
+    scoreDao->init();
+
     //为不同模式的按钮添加信号槽
     connect(ui->button3, SIGNAL(clicked(bool)), this, SLOT(showBasicModeWindow()));
     connect(ui->button2, SIGNAL(clicked(bool)), this, SLOT(showRelaxedModeWindow()));
     connect(ui->button1, SIGNAL(clicked(bool)), this, SLOT(showLevelModeWindow()));
-
+    connect(ui->pushButton, SIGNAL(clicked(bool)), this, SLOT(showRankingList()));
+    connect(ui->pushButton_5, SIGNAL(clicked(bool)), this, SLOT(showHelp()));
 }
 
 MainWindow::~MainWindow()
@@ -87,3 +96,41 @@ void MainWindow::setUpWelcomeWindow() { //创建欢迎界面
     window->close();
 }
 
+void MainWindow::showHelp() {
+    HelpDialog *helpDialog = new HelpDialog(this);
+    helpDialog->showHelpDialog();
+}
+
+void MainWindow::showRankingList() {
+    QDialog *dialog = new QDialog();
+    QGridLayout *layout = new QGridLayout();
+    dialog->setLayout(layout);
+    QStandardItemModel *rankModel = new QStandardItemModel(); //TableViewModel
+    rankTableView = new QTableView();
+    rankTableView->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    rankTableView->setGeometry(550, 300, 155, 200);
+    rankModel->setHorizontalHeaderItem(0, new QStandardItem("玩家姓名"));
+    rankModel->setHorizontalHeaderItem(1, new QStandardItem("积分"));
+
+    //从文件中读取排行榜
+    char buffer[100];
+    while (scoreDao->in->getline(buffer, sizeof(buffer))) {
+        QString data(buffer);
+        scoreDao->insertItem(data.left(12), data.right(3));
+    }
+
+    //给Model添加数据
+    int row = 0;
+    for (std::vector<QString>* each : *(scoreDao->items)) {
+        rankModel->setItem(row, 0, new QStandardItem(each->at(0)));
+        rankModel->setItem(row, 1, new QStandardItem(each->at(1)));
+        row++;
+    }
+    rankModel->sort(1, Qt::DescendingOrder);
+
+    rankTableView->setModel(rankModel);
+    rankTableView->resizeColumnsToContents();
+    layout->addWidget(rankTableView);
+//    rankTableView->show();
+    dialog->show();
+}

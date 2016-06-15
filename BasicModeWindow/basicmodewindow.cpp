@@ -7,6 +7,8 @@
 #include "Model/mapbutton.h"
 #include <QMessageBox>
 #include <QTime>
+#include <QDoubleSpinBox>
+
 
 BasicModeWindow::BasicModeWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -14,6 +16,10 @@ BasicModeWindow::BasicModeWindow(QWidget *parent) :
 {
     ui->setupUi(this);
     setWindowTitle("欢乐连连看");
+    scoreDao = new ScoreDao();
+    scoreDao->init();
+    gameModel.init();
+    helpDialog = new HelpDialog(ui->picWidget);
     ui->progressBar->setValue(totleTime);//progressBar初始化
     grid = new QGridLayout(ui->picWidget); //为游戏棋盘创建网格布局
     timer = new QTimer(this);
@@ -30,7 +36,8 @@ BasicModeWindow::BasicModeWindow(QWidget *parent) :
     connect(timer,SIGNAL(timeout()),this,SLOT(timerUpDate())); //将timer和timerUpDate方法关联
     connect(ui->pushButton_3, SIGNAL(clicked(bool)), this, SLOT(findHint()));
     connect(ui->pushButton_4, SIGNAL(clicked(bool)), this, SLOT(resetMap()));
-
+    connect(ui->pushButton_5, SIGNAL(clicked(bool)), this, SLOT(changeSpeed()));
+    connect(ui->pushButton_6, SIGNAL(clicked(bool)), this, SLOT(showHelp()));
 }
 
 BasicModeWindow::~BasicModeWindow()
@@ -45,11 +52,12 @@ BasicModeWindow::~BasicModeWindow()
 void BasicModeWindow::startGame() { //开始游戏
     initMap(); //初始化游戏棋盘
     totleTime = 100;
-    ui->progressBar->setValue(totleTime);//progressBar初始化
+//    ui->progressBar->setValue(totleTime);//progressBar初始化
     timer->start(1000); //开始计时，时间间隔为1000ms
     ui->pushButton_2->setEnabled(true);
     ui->pushButton_3->setEnabled(true);
     ui->pushButton_4->setEnabled(true);
+    ui->pushButton_5->setEnabled(false);
     ui->pushButton->setText("重新开始");
     //如果pushButton之前绑定了startGame方法, 就先解除绑定，然后绑定reStartGame方法
     if (disconnect(ui->pushButton, SIGNAL(clicked(bool)), this, SLOT(startGame())))
@@ -60,10 +68,26 @@ void BasicModeWindow::reStartGame() { //重新开始游戏
     //清除游戏棋盘
     auto children = ui->picWidget->children();
     for (int i = 1; i < 217; i++) {
-        grid->removeWidget((QWidget*)children[i]);
-        children[i]->deleteLater();
+        if (children[i]->objectName() != "") {
+            grid->removeWidget((QWidget*)children[i]);
+            children[i]->deleteLater();
+        }
     }
     startGame();
+}
+
+
+void BasicModeWindow::resetMap() {
+    auto children = ui->picWidget->children();
+    for (int i = 1; i < 217; i++) {
+        if (children[i]->objectName() != "") {
+            grid->removeWidget((QWidget*)children[i]);
+            children[i]->deleteLater();
+        }
+    }
+
+    reset(true);
+
 }
 
 void BasicModeWindow::pauseGame() {
@@ -118,6 +142,9 @@ void BasicModeWindow::select(const QString &msg) {
             p2->setVisible(false);
             p2->setStyleSheet("background:transparent");
 
+            gameModel.selectedPic = "";
+
+
             //在消子之后判断是否获胜
             if (gameModel.isWin()){
                 QMessageBox *box = new QMessageBox(this);
@@ -127,6 +154,19 @@ void BasicModeWindow::select(const QString &msg) {
                 ui->pushButton_2->setEnabled(false);
                 ui->pushButton_3->setEnabled(false);
                 ui->pushButton_4->setEnabled(false);
+
+                //向排行榜插入一条记录
+                QDateTime time = QDateTime::currentDateTime();//获取系统现在的时间
+                QString name = time.toString("yyyyMMddhhmm"); //设置显示格式
+                int s = (160 - gameModel.totalPic) * 5;
+                if (s < 0)
+                    s = 0;
+                QString score = QString::number(s);
+                if (score.length() == 2)
+                    score = "0" + score;
+                else if (score.length() == 1)
+                    score = "00" + score;
+                scoreDao->outputItem(name, score);
             }
 
         } else { //不可消去
@@ -138,14 +178,25 @@ void BasicModeWindow::select(const QString &msg) {
             sb->setChecked(true);
         }
     }
-
-
 }
 
 void BasicModeWindow::timerUpDate() {
-    totleTime -= 0.5; //timer每更新一次，总时间减去0.5s
+    totleTime -= speed; //timer每更新一次，总时间减去0.5s
     ui->progressBar->setValue(totleTime); //更新progressBar的值
     if (totleTime == 0) {
+        //向排行榜插入一条记录
+        QDateTime time = QDateTime::currentDateTime();//获取系统现在的时间
+        QString name = time.toString("yyyyMMddhhmm"); //设置显示格式
+        int s = (160 - gameModel.totalPic) * 5;
+        if (s < 0)
+            s = 0;
+        QString score = QString::number(s);
+        if (score.length() == 2)
+            score = "0" + score;
+        else if (score.length() == 1)
+            score = "00" + score;
+        scoreDao->outputItem(name, score);
+
         QMessageBox *box = new QMessageBox(this);
         box->setInformativeText("时间到！");
         box->show();
@@ -156,21 +207,11 @@ void BasicModeWindow::timerUpDate() {
     }
 }
 
-void BasicModeWindow::resetMap() {
-    auto children = ui->picWidget->children();
-    for (int i = 1; i < 217; i++) {
-        grid->removeWidget((QWidget*)children[i]);
-        children[i]->deleteLater();
-    }
-
-    reset(true);
-
-}
 
 void BasicModeWindow::findHint() {
     QString pos2, pos3;
     QString pic1, pic2;
-    QString tmp1, tmp2;
+    int tmp1, tmp2;
     bool success = false;
     for (int i = 0; i < 216 && !success; i++) {
         for (int j = 0; j < 216 && !success && j!=i; j++) {
@@ -190,6 +231,8 @@ void BasicModeWindow::findHint() {
                 success = true;
                 gameModel.map[i/18][i%18] = tmp1;
                 gameModel.map[j/18][j%18] = tmp2;
+
+                gameModel.totalPic += 2; //还原被减去的图片数
             }
 
         }
@@ -244,7 +287,7 @@ void BasicModeWindow::reset(bool flag) {
                 if (i == 0 || i == 11 || j == 0 || j == 17) {
                     continue;
                 }
-                gameModel.rawMap[i-1][j-1] = gameModel.map[i][j].toInt();
+                gameModel.rawMap[i-1][j-1] = gameModel.map[i][j];
             }
         }
     }
@@ -273,17 +316,17 @@ void BasicModeWindow::reset(bool flag) {
                 continue;
             }
 
-            QString randomPicIndex = QString::number(gameModel.rawMap[i-1][j-1]);
+            int randomPicIndex = gameModel.rawMap[i-1][j-1];
             MapButton *pic = new MapButton();
-            if (randomPicIndex == "0") {
+            if (randomPicIndex == 0) {
                 pic->setStyleSheet("background:transparent");
                 pic->setObjectName(QString::number(i * 18 + j));
                 pic->setIconSize(QSize(40, 40));
                 pic->setMinimumSize(40, 40);
                 pic->setMaximumSize(40, 40);
-                gameModel.map[i][j] = "";
+                gameModel.map[i][j] = 0;
             } else {
-                pic->setIcon(QIcon(":/icon/res/" + randomPicIndex + ".png"));
+                pic->setIcon(QIcon(":/icon/res/" + QString::number(randomPicIndex) + ".png"));
                 pic->setObjectName(QString::number(i * 18 + j));
                 pic->setIconSize(QSize(40, 40));
                 pic->setMinimumSize(40, 40);
@@ -297,3 +340,40 @@ void BasicModeWindow::reset(bool flag) {
         }
     }
 }
+
+void BasicModeWindow::showHelp() {
+    helpDialog->showHelpDialog();
+}
+
+void BasicModeWindow::changeSpeed() {
+    QGridLayout *layout = new QGridLayout();
+    changeSpeedDialog = new QDialog();
+    box = new QSpinBox();
+    box->setMaximum(500);
+    box->setMinimum(10);
+    box->setValue(100/speed);
+    box2 = new QSpinBox();
+    box2->setMaximum(10);
+    box2->setMinimum(5);
+    box2->setValue(PIC_NUM);
+    QLabel *label = new QLabel("设置总时间（单位s）,最大500, 最小10");
+    QLabel *label2 = new QLabel("设置花色数，最小5，最大10");
+    layout->addWidget(label,0, 0);
+    layout->addWidget(box, 0, 1);
+    layout->addWidget(label2, 1, 0);
+    layout->addWidget(box2, 1, 1);
+    QPushButton *button = new QPushButton("确定");
+    connect(button, SIGNAL(clicked(bool)), this, SLOT(_changeSpeed()));
+    layout->addWidget(button, 2, 0);
+    changeSpeedDialog->setLayout(layout);
+    changeSpeedDialog->show();
+
+}
+
+void BasicModeWindow::_changeSpeed() {
+    speed = 100.0 / box->value();
+    PIC_NUM = box2->value();
+    changeSpeedDialog->hide();
+}
+
+
